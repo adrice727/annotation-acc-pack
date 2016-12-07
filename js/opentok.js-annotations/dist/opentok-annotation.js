@@ -80,7 +80,7 @@
 
     if (typeof module === 'object' && typeof module.exports === 'object') {
       $ = require('jquery');
-    }  
+    }
 
     var context = options.externalWindow ? options.externalWindow.document : window.document;
 
@@ -117,10 +117,10 @@
 
 
     // INFO Mirrored feeds contain the OT_mirrored class
-    if(isVideo) {
+    if (isVideo) {
       isPublisher = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_publisher' + ' ') > -1;
       mirrored = isPublisher ? (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_mirrored' + ' ') > -1 : false;
-      scaledToFill = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_fit-mode-cover' + ' ') > -1;  
+      scaledToFill = (' ' + self.videoFeed.element.className + ' ').indexOf(' ' + 'OT_fit-mode-cover' + ' ') > -1;
     } else {
       mirrored = false;
       scaledToFill = false;
@@ -213,7 +213,7 @@
         if (item.size) {
           self.changeLineWidth(item.size);
         }
-      // 'undo' and 'clear' are actions, not items that can be selected
+        // 'undo' and 'clear' are actions, not items that can be selected
       } else if (item.id !== 'OT_undo' && item.id !== 'OT_clear') {
         updateSelected();
         self.selectedItem = item;
@@ -284,7 +284,7 @@
           width = canvas.width;
           height = height * scale;
           offsetX = 0;
-          offsetY = (canvas.height - height)/2;
+          offsetY = (canvas.height - height) / 2;
         } else {
           scale = canvas.height / height;
           height = canvas.height;
@@ -304,7 +304,7 @@
           ctxCopy.translate(width, 0);
           ctxCopy.scale(-1, 1);
         }
-        ctxCopy.drawImage(image, offsetX, offsetY, width,height);
+        ctxCopy.drawImage(image, offsetX, offsetY, width, height);
 
         // We want to make sure we draw the annotations the same way, so we need to flip back
         if (mirrored) {
@@ -321,11 +321,12 @@
         canvasCopy = null;
       };
 
-      if(isVideo) {
-        imgData = 'data:image/png;base64,' + self.videoFeed.getImgData(); 
-        image.src = imgData;   
+      if (isVideo) {
+        imgData = 'data:image/png;base64,' + self.videoFeed.getImgData();
+        image.src = imgData;
       } else {
-        image.src = $(self.parent).css('background-image').replace( /url\("|"\)/g, '' );
+        var currentWindow = options.externalWindow ? options.externalWindow : window;
+        image.src = currentWindow.getComputedStyle(self.parent)['background-image'].replace(/url\("|"\)/g, '');
       }
 
     };
@@ -1079,8 +1080,8 @@
           if (historyItem.platform === 'ios' && !!itemsToRemove && !!itemsToRemove.length && itemsToRemove[0] !== null) {
             undoLastIos(incoming, cid, itemsToRemove);
             break;
-          } 
-                
+          }
+
           endPoint = endPoint || historyItem.endPoint;
           removed = drawHistory.splice(i, 1)[0];
           removedItems.push(removed.guid);
@@ -1114,12 +1115,12 @@
       var removed;
       var endPoint = false;
       var removedItems = [];
-      
-     
+
+
       for (var i = drawHistory.length - 1; i >= 0; i--) {
         historyItem = drawHistory[i];
         if (historyItem.fromId === cid) {
-          if(historyItem.guid === itemsToRemove[0]) {
+          if (historyItem.guid === itemsToRemove[0]) {
             removed = drawHistory.splice(i, 1)[0];
             removedItems.push(removed.guid);
           }
