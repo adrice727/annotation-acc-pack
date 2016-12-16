@@ -97,31 +97,34 @@
       canvas.style.height = window.getComputedStyle(this.parent).height;
     }
 
-    var _scale = {
-      get X() {
-        return self.videoFeed.stream.videoDimensions.width / canvas.width;
-      },
-      get Y() {
-        return self.videoFeed.stream.videoDimensions.height / canvas.height;
-      }
-    };
-
     function VideoRelativeCoordinateSet(update) {
+
       var returnedObj = {};
 
-      Object.keys(update).forEach(function(attr) {
+      var scale = {
+        get X() {
+          var width = cobrowsing ? canvas.width : self.videoFeed.stream.videoDimensions.width;
+          return width / canvas.width;
+        },
+        get Y() {
+          var height = cobrowsing ? canvas.height : self.videoFeed.stream.videoDimensions.height;
+          return height / canvas.height;
+        }
+      };
+
+      Object.keys(update).forEach(function (attr) {
         returnedObj[attr] = update[attr];
       });
-      ['X', 'Y'].forEach(function(coord) {
-        ['to', 'from', 'last', 'm', 'start', 'point'].forEach(function(verb) {
+      ['X', 'Y'].forEach(function (coord) {
+        ['to', 'from', 'last', 'm', 'start', 'point'].forEach(function (verb) {
           var attr = verb + coord;
           returnedObj['_' + attr] = returnedObj[attr];
           Object.defineProperty(returnedObj, attr, {
-            get: function() {
-              return returnedObj['_' + attr] / _scale[coord];
+            get: function () {
+              return returnedObj['_' + attr] / scale[coord];
             },
-            set: function(newVal) {
-              returnedObj['_' + attr] = newVal;// * _scale[coord];
+            set: function (newVal) {
+              returnedObj['_' + attr] = newVal; // * scale[coord];
             }
           });
         });
@@ -130,23 +133,23 @@
     }
 
 
-    var self = this,
-      ctx,
-      cbs = [],
-      isPublisher,
-      mirrored,
-      scaledToFill,
-      batchUpdates = [],
-      drawHistory = [],
-      drawHistoryReceivedFrom,
-      updateHistory = [],
-      eventHistory = [],
-      isStartPoint = false,
-      isVideo = self.videoFeed && self.videoFeed.element ? true : false,
-      client = new VideoRelativeCoordinateSet({
-        dragging: false
-      });
-
+    var self = this;
+    var ctx;
+    var cbs = [];
+    var isPublisher;
+    var mirrored;
+    var scaledToFill;
+    var batchUpdates = [];
+    var drawHistory = [];
+    var drawHistoryReceivedFrom = [];
+    var updateHistory = [];
+    var eventHistory = [];
+    var isStartPoint = false;
+    var isVideo = self.videoFeed && self.videoFeed.element ? true : false;
+    var cobrowsing = !self.videoFeed.stream;
+    var client = new VideoRelativeCoordinateSet({
+      dragging: false
+    });
 
 
     // INFO Mirrored feeds contain the OT_mirrored class
@@ -347,7 +350,7 @@
         ctxCopy.drawImage(canvas, 0, 0);
 
         cbs.forEach(function (cb) {
-          var data = {src:canvasCopy.toDataURL(),isAnnotationEnd:isAnnotationEnd};
+          var data = { src: canvasCopy.toDataURL(), isAnnotationEnd: isAnnotationEnd };
           cb.call(self, data);
         });
 
@@ -399,17 +402,28 @@
       var offsetLeft = !!resizeEvent ? event.canvas.offsetLeft : canvas.offsetLeft;
       var offsetTop = !!resizeEvent ? event.canvas.offsetTop : canvas.offsetTop;
 
-      var videoDimensions = self.videoFeed.stream.videoDimensions;
-
-      var scaleX = videoDimensions.width / canvas.width;
-      var scaleY = videoDimensions.height / canvas.height;
-
-      var offsetX = event.offsetX || event.pageX - offsetLeft ||
-        (event.changedTouches && event.changedTouches[0].pageX - offsetLeft);
-      var offsetY = event.offsetY || event.pageY - offsetTop ||
-        (event.changedTouches && event.changedTouches[0].pageY - offsetTop);
-      var x = offsetX * scaleX;
-      var y = offsetY * scaleY;
+      if (cobrowsing) {
+        var baseWidth = !!resizeEvent ? event.canvas.width : self.parent.clientWidth;
+        var baseHeight = !!resizeEvent ? event.canvas.height : self.parent.clientHeight;
+        var scaleX = canvas.width / baseWidth;
+        var scaleY = canvas.height / baseHeight;
+        var offsetX = event.offsetX || event.pageX - offsetLeft ||
+          (event.changedTouches && event.changedTouches[0].pageX - offsetLeft);
+        var offsetY = event.offsetY || event.pageY - offsetTop ||
+          (event.changedTouches && event.changedTouches[0].pageY - offsetTop);
+        var x = offsetX * scaleX;
+        var y = offsetY * scaleY;
+      } else {
+        var videoDimensions = self.videoFeed.stream.videoDimensions;
+        var scaleX = videoDimensions.width / canvas.width;
+        var scaleY = videoDimensions.height / canvas.height;
+        var offsetX = event.offsetX || event.pageX - offsetLeft ||
+          (event.changedTouches && event.changedTouches[0].pageX - offsetLeft);
+        var offsetY = event.offsetY || event.pageY - offsetTop ||
+          (event.changedTouches && event.changedTouches[0].pageY - offsetTop);
+        var x = offsetX * scaleX;
+        var y = offsetY * scaleY;
+      }
 
       var update;
       var selectedItem = resizeEvent ? event.selectedItem : self.selectedItem;
@@ -933,7 +947,7 @@
               client.lastX = (client._pointY + client._lastY) / 2;
             } else {
               ctx.quadraticCurveTo(client.lastX, client.lastY, (client.pointX + client.lastX) / 2,
-                                   (client.pointY + client.lastY) / 2);
+                (client.pointY + client.lastY) / 2);
               client.lastX = (client._pointX + client._lastX) / 2;
               client.lastY = (client._pointY + client._lastY) / 2;
             }
@@ -2151,6 +2165,11 @@
   var _resizeCanvas = function () {
     var width;
     var height;
+    var cobrowsing = !!_elements.imageId;
+    if (cobrowsing) {
+      // Cobrowsing images are currently fixed size, so resize isn't needed
+      return;
+    }
 
     if (_elements.imageId === null) {
       var el = _elements.absoluteParent || _elements.canvasContainer;

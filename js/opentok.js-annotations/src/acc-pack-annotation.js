@@ -133,6 +133,11 @@
   var _resizeCanvas = function () {
     var width;
     var height;
+    var cobrowsing = !!_elements.imageId;
+    if (cobrowsing) {
+      // Cobrowsing images are currently fixed size, so resize isn't needed
+      return;
+    }
 
     if (_elements.imageId === null) {
       var el = _elements.absoluteParent || _elements.canvasContainer;
