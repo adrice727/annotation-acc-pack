@@ -147,6 +147,7 @@
     var isStartPoint = false;
     var isVideo = self.videoFeed && self.videoFeed.element ? true : false;
     var cobrowsing = !self.videoFeed.stream;
+    var subscribingToMobileScreen = false;
     var client = new VideoRelativeCoordinateSet({
       dragging: false
     });
@@ -350,7 +351,7 @@
         ctxCopy.drawImage(canvas, 0, 0);
 
         cbs.forEach(function (cb) {
-          var data = {src: canvasCopy.toDataURL(), isAnnotationEnd: isAnnotationEnd};
+          var data = { src: canvasCopy.toDataURL(), isAnnotationEnd: isAnnotationEnd };
           cb.call(self, data);
         });
 
@@ -372,10 +373,12 @@
       cbs.push(cb);
     };
 
+    this.onMobileScreenShare = function (mobile) {
+      _subscribingToMobileScreen = mobile;
+    };
+
     this.onResize = function () {
-
       drawUpdates(updateHistory, true);
-
       draw(null, true);
     };
 
@@ -420,6 +423,10 @@
         var videoDimensions = self.videoFeed.stream.videoDimensions;
         var scaleX = videoDimensions.width / canvas.width;
         var scaleY = videoDimensions.height / canvas.height;
+        if (subscribingToMobileScreen) {
+          scaleX = 1;
+          scaleY = 1;
+        }
         var offsetX = event.offsetX || event.pageX - offsetLeft ||
           (event.changedTouches && event.changedTouches[0].pageX - offsetLeft);
         var offsetY = event.offsetY || event.pageY - offsetTop ||
@@ -553,7 +560,7 @@
                     color: resizeEvent ? event.userColor : self.userColor,
                     lineWidth: resizeEvent ? event.lineWidth : shapeLineWidth,
                     selectedItem: selectedItem
-                    // INFO The points for scaling will get added when drawing is complete
+                      // INFO The points for scaling will get added when drawing is complete
                   };
 
                   draw(new VideoRelativeCoordinateSet(update), true);
@@ -782,14 +789,14 @@
       context.body.appendChild(textInput);
       textInput.focus();
 
-      textInput.addEventListener('keydown', function(event){
+      textInput.addEventListener('keydown', function (event) {
         //If its Enter
         if (event.which === 13) {
           creteCommitPop(textInput)
         }
       })
 
-      textInput.addEventListener('blur', function(){
+      textInput.addEventListener('blur', function () {
         creteCommitPop(textInput)
       })
 
@@ -800,7 +807,7 @@
     };
 
     var creteCommitPop = function (textInput) {
-      if(context.getElementById(commitPopId)) return;
+      if (context.getElementById(commitPopId)) return;
 
       var commitPop = context.createElement('div');
 
@@ -841,9 +848,9 @@
       });
     };
 
-    var dismissTextAnnotation = function(){
-      if(context.getElementById(textInputId)) context.getElementById(textInputId).remove();
-      if(context.getElementById(commitPopId)) context.getElementById(commitPopId).remove();
+    var dismissTextAnnotation = function () {
+      if (context.getElementById(textInputId)) context.getElementById(textInputId).remove();
+      if (context.getElementById(commitPopId)) context.getElementById(commitPopId).remove();
       textEvent = null;
       ignoreClicks = false;
     }
@@ -1344,136 +1351,136 @@
     var imageAssets = options.imageAssets || DEFAULT_ASSET_URL;
 
     var toolbarItems = [{
-      id: 'OT_pen',
-      title: 'Pen',
-      icon: [imageAssets, 'annotation-pencil.png'].join(''),
-      selectedIcon: [imageAssets, 'annotation-pencil.png'].join(''),
-      items: {/* Built dynamically */}
-    }, {
-      id: 'OT_colors',
-      title: 'Colors',
-      icon: '',
-      items: {/* Built dynamically */}
-    }, {
-      id: 'OT_shapes',
-      title: 'Shapes',
-      icon: [imageAssets, 'annotation-shapes.png'].join(''),
-      items: [{
-        id: 'OT_rect',
-        title: 'Rectangle',
-        icon: [imageAssets, 'annotation-rectangle.png'].join(''),
-        points: [
-          [0, 0],
-          [1, 0],
-          [1, 1],
-          [0, 1],
-          [0, 0] // Reconnect point
+        id: 'OT_pen',
+        title: 'Pen',
+        icon: [imageAssets, 'annotation-pencil.png'].join(''),
+        selectedIcon: [imageAssets, 'annotation-pencil.png'].join(''),
+        items: { /* Built dynamically */ }
+      }, {
+        id: 'OT_colors',
+        title: 'Colors',
+        icon: '',
+        items: { /* Built dynamically */ }
+      }, {
+        id: 'OT_shapes',
+        title: 'Shapes',
+        icon: [imageAssets, 'annotation-shapes.png'].join(''),
+        items: [{
+            id: 'OT_rect',
+            title: 'Rectangle',
+            icon: [imageAssets, 'annotation-rectangle.png'].join(''),
+            points: [
+              [0, 0],
+              [1, 0],
+              [1, 1],
+              [0, 1],
+              [0, 0] // Reconnect point
+            ]
+          },
+          {
+            id: 'OT_rect_fill',
+            title: 'Rectangle-Fill',
+            icon: [imageAssets, 'annotation-rectangle.png'].join(''),
+            points: [
+              [0, 0],
+              [1, 0],
+              [1, 1],
+              [0, 1],
+              [0, 0] // Reconnect point
+            ]
+          }, {
+            id: 'OT_oval',
+            title: 'Oval',
+            icon: [imageAssets, 'annotation-oval.png'].join(''),
+            enableSmoothing: true,
+            points: [
+              [0, 0.5],
+              [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+              [0.5, 0],
+              [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
+              [1, 0.5],
+              [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
+              [0.5, 1],
+              [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
+              [0, 0.5],
+              [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
+            ]
+          }, {
+            id: 'OT_oval_fill',
+            title: 'Oval-Fill',
+            icon: [imageAssets, 'annotation-oval-fill.png'].join(''),
+            enableSmoothing: true,
+            points: [
+              [0, 0.5],
+              [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
+              [0.5, 0],
+              [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
+              [1, 0.5],
+              [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
+              [0.5, 1],
+              [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
+              [0, 0.5],
+              [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
+            ]
+          }, {
+            id: 'OT_star',
+            title: 'Star',
+            icon: [imageAssets, 'annotation-star.png'].join(''),
+            points: [
+              /* eslint-disable max-len */
+              [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
+              [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
+              [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
+              [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
+              [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
+              [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
+              [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
+              [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
+              [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
+              [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
+              [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
+              /* eslint-enable max-len */
+            ]
+          }, {
+            id: 'OT_arrow',
+            title: 'Arrow',
+            icon: [imageAssets, 'annotation-arrow.png'].join(''),
+            points: [
+              [0, 1],
+              [3, 1],
+              [3, 0],
+              [5, 2],
+              [3, 4],
+              [3, 3],
+              [0, 3],
+              [0, 1] // Reconnect point
+            ]
+          }, {
+            id: 'OT_line',
+            title: 'Line',
+            icon: [imageAssets, 'annotation-line.png'].join(''),
+            selectedIcon: [imageAssets, 'annotation-line.png'].join(''),
+            points: [
+              [0, 0],
+              [0, 1]
+            ]
+          }
         ]
+      }, {
+        id: 'OT_text',
+        title: 'Text',
+        icon: [imageAssets, 'annotation-text.png'].join(''),
+        selectedIcon: [imageAssets, 'annotation-text.png'].join('')
+      }, {
+        id: 'OT_capture',
+        title: 'Capture',
+        icon: [imageAssets, 'annotation-camera.png'].join(''),
+        selectedIcon: [imageAssets, 'annotation-camera.png'].join('')
+      }, {
+        id: 'OT_undo',
+        title: 'Undo',
+        icon: [imageAssets, 'annotation-undo.png'].join('')
       },
-        {
-          id: 'OT_rect_fill',
-          title: 'Rectangle-Fill',
-          icon: [imageAssets, 'annotation-rectangle.png'].join(''),
-          points: [
-            [0, 0],
-            [1, 0],
-            [1, 1],
-            [0, 1],
-            [0, 0] // Reconnect point
-          ]
-        }, {
-          id: 'OT_oval',
-          title: 'Oval',
-          icon: [imageAssets, 'annotation-oval.png'].join(''),
-          enableSmoothing: true,
-          points: [
-            [0, 0.5],
-            [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
-            [0.5, 0],
-            [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
-            [1, 0.5],
-            [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
-            [0.5, 1],
-            [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
-            [0, 0.5],
-            [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
-          ]
-        }, {
-          id: 'OT_oval_fill',
-          title: 'Oval-Fill',
-          icon: [imageAssets, 'annotation-oval-fill.png'].join(''),
-          enableSmoothing: true,
-          points: [
-            [0, 0.5],
-            [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)],
-            [0.5, 0],
-            [0.5 + 0.5 * Math.cos(7 * Math.PI / 4), 0.5 + 0.5 * Math.sin(7 * Math.PI / 4)],
-            [1, 0.5],
-            [0.5 + 0.5 * Math.cos(Math.PI / 4), 0.5 + 0.5 * Math.sin(Math.PI / 4)],
-            [0.5, 1],
-            [0.5 + 0.5 * Math.cos(3 * Math.PI / 4), 0.5 + 0.5 * Math.sin(3 * Math.PI / 4)],
-            [0, 0.5],
-            [0.5 + 0.5 * Math.cos(5 * Math.PI / 4), 0.5 + 0.5 * Math.sin(5 * Math.PI / 4)]
-          ]
-        }, {
-          id: 'OT_star',
-          title: 'Star',
-          icon: [imageAssets, 'annotation-star.png'].join(''),
-          points: [
-            /* eslint-disable max-len */
-            [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))],
-            [0.5 + 0.25 * Math.cos(126 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(126 * (Math.PI / 180))],
-            [0.5 + 0.5 * Math.cos(162 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(162 * (Math.PI / 180))],
-            [0.5 + 0.25 * Math.cos(198 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(198 * (Math.PI / 180))],
-            [0.5 + 0.5 * Math.cos(234 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(234 * (Math.PI / 180))],
-            [0.5 + 0.25 * Math.cos(270 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(270 * (Math.PI / 180))],
-            [0.5 + 0.5 * Math.cos(306 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(306 * (Math.PI / 180))],
-            [0.5 + 0.25 * Math.cos(342 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(342 * (Math.PI / 180))],
-            [0.5 + 0.5 * Math.cos(18 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(18 * (Math.PI / 180))],
-            [0.5 + 0.25 * Math.cos(54 * (Math.PI / 180)), 0.5 + 0.25 * Math.sin(54 * (Math.PI / 180))],
-            [0.5 + 0.5 * Math.cos(90 * (Math.PI / 180)), 0.5 + 0.5 * Math.sin(90 * (Math.PI / 180))]
-            /* eslint-enable max-len */
-          ]
-        }, {
-          id: 'OT_arrow',
-          title: 'Arrow',
-          icon: [imageAssets, 'annotation-arrow.png'].join(''),
-          points: [
-            [0, 1],
-            [3, 1],
-            [3, 0],
-            [5, 2],
-            [3, 4],
-            [3, 3],
-            [0, 3],
-            [0, 1] // Reconnect point
-          ]
-        }, {
-          id: 'OT_line',
-          title: 'Line',
-          icon: [imageAssets, 'annotation-line.png'].join(''),
-          selectedIcon: [imageAssets, 'annotation-line.png'].join(''),
-          points: [
-            [0, 0],
-            [0, 1]
-          ]
-        }
-      ]
-    }, {
-      id: 'OT_text',
-      title: 'Text',
-      icon: [imageAssets, 'annotation-text.png'].join(''),
-      selectedIcon: [imageAssets, 'annotation-text.png'].join('')
-    }, {
-      id: 'OT_capture',
-      title: 'Capture',
-      icon: [imageAssets, 'annotation-camera.png'].join(''),
-      selectedIcon: [imageAssets, 'annotation-camera.png'].join('')
-    }, {
-      id: 'OT_undo',
-      title: 'Undo',
-      icon: [imageAssets, 'annotation-undo.png'].join('')
-    },
       {
         id: 'OT_clear',
         title: 'Clear',
@@ -1516,27 +1523,27 @@
     this.items = getItems();
 
     this.colors = options.colors || [
-        '#1abc9c',
-        '#2ecc71',
-        '#3498db',
-        '#9b59b6',
-        '#34495e',
-        '#16a085',
-        '#27ae60',
-        '#2980b9',
-        '#8e44ad',
-        '#2c3e50',
-        '#f1c40f',
-        '#e67e22',
-        '#e74c3c',
-        '#ecf0f1',
-        '#95a5a6',
-        '#f39c12',
-        '#d35400',
-        '#c0392b',
-        '#bdc3c7',
-        '#7f8c8d'
-      ];
+      '#1abc9c',
+      '#2ecc71',
+      '#3498db',
+      '#9b59b6',
+      '#34495e',
+      '#16a085',
+      '#27ae60',
+      '#2980b9',
+      '#8e44ad',
+      '#2c3e50',
+      '#f1c40f',
+      '#e67e22',
+      '#e74c3c',
+      '#ecf0f1',
+      '#95a5a6',
+      '#f39c12',
+      '#d35400',
+      '#c0392b',
+      '#bdc3c7',
+      '#7f8c8d'
+    ];
 
     this.cbs = [];
     var canvases = [];
@@ -1806,7 +1813,7 @@
 
                         var lineIcon = context.createElement('div');
                         lineIcon.setAttribute('class', 'line-width-icon')
-                        // TODO Allow devs to change this?
+                          // TODO Allow devs to change this?
                         lineIcon.style.backgroundColor = '#FFFFFF';
                         lineIcon.style.width = '80%';
                         lineIcon.style.height = subItem.size + 'px';
@@ -2096,6 +2103,7 @@
   var _accPack;
   var _session;
   var _canvas;
+  var _subscribingToMobileScreen;
   var _elements = {};
 
   /** Analytics */
@@ -2220,6 +2228,12 @@
     }
 
     var videoDimensions = _canvas.videoFeed.stream.videoDimensions;
+
+    // Override dimensions when subscribing to a mobile screen
+    if (_subscribingToMobileScreen) {
+      videoDimensions.width = width;
+      videoDimensions.height = height;
+    }
     var origRatio = videoDimensions.width / videoDimensions.height;
     var destRatio = width / height;
     var calcDimensions = {
@@ -2248,11 +2262,11 @@
     _triggerEvent('resizeCanvas');
   };
 
-  var _changeColorByIndex = function(colorIndex) {
+  var _changeColorByIndex = function (colorIndex) {
     _canvas.changeColorByIndex(colorIndex);
   };
 
-  var _takeScreenShot = function() {
+  var _takeScreenShot = function () {
     _canvas.captureScreenshot(true);
   };
 
@@ -2373,6 +2387,21 @@
     $('#annotationToolbarContainer').remove();
   };
 
+  // Determine whether or not the subscriber stream is from a mobile device
+  var _requestPlatformData = function () {
+    _session.signal({
+      type: 'otAnnotation_requestPlatform',
+      to: pubSub.stream.connection,
+    });
+
+    _session.on('signal:otAnnotation_mobileScreenShare', function (event) {
+      var platform = event.data ? JSON.parse(event.data).platform : null;
+      var isMobile = (platform == 'ios' || platform === 'android')
+      _subscribingToMobileScreen = isMobile;
+      _canvas.onMobileScreenShare(isMobile);
+    });
+  };
+
   /**
    * Creates an external window (if required) and links the annotation toolbar
    * to the session
@@ -2428,7 +2457,6 @@
     _elements.imageId = _.property('imageId')(options) || null;
     _elements.canvasContainer = container;
 
-
     // The canvas object
     _canvas = new OTSolution.Annotations({
       feed: pubSub,
@@ -2445,6 +2473,7 @@
       };
 
     _canvas.onScreenCapture(onScreenCapture);
+    _requestPlatformData();
 
 
     var context = _elements.externalWindow ? _elements.externalWindow : window;

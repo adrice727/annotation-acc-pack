@@ -22,6 +22,7 @@
   var _accPack;
   var _session;
   var _canvas;
+  var _subscribingToMobileScreen;
   var _elements = {};
 
   /** Analytics */
@@ -146,6 +147,12 @@
     }
 
     var videoDimensions = _canvas.videoFeed.stream.videoDimensions;
+
+    // Override dimensions when subscribing to a mobile screen
+    if (_subscribingToMobileScreen) {
+      videoDimensions.width = width;
+      videoDimensions.height = height;
+    }
     var origRatio = videoDimensions.width / videoDimensions.height;
     var destRatio = width / height;
     var calcDimensions = {
@@ -174,11 +181,11 @@
     _triggerEvent('resizeCanvas');
   };
 
-  var _changeColorByIndex = function(colorIndex) {
+  var _changeColorByIndex = function (colorIndex) {
     _canvas.changeColorByIndex(colorIndex);
   };
 
-  var _takeScreenShot = function() {
+  var _takeScreenShot = function () {
     _canvas.captureScreenshot(true);
   };
 
@@ -299,6 +306,21 @@
     $('#annotationToolbarContainer').remove();
   };
 
+  // Determine whether or not the subscriber stream is from a mobile device
+  var _requestPlatformData = function () {
+    _session.signal({
+      type: 'otAnnotation_requestPlatform',
+      to: pubSub.stream.connection,
+    });
+
+    _session.on('signal:otAnnotation_mobileScreenShare', function (event) {
+      var platform = event.data ? JSON.parse(event.data).platform : null;
+      var isMobile = (platform == 'ios' || platform === 'android')
+      _subscribingToMobileScreen = isMobile;
+      _canvas.onMobileScreenShare(isMobile);
+    });
+  };
+
   /**
    * Creates an external window (if required) and links the annotation toolbar
    * to the session
@@ -354,7 +376,6 @@
     _elements.imageId = _.property('imageId')(options) || null;
     _elements.canvasContainer = container;
 
-
     // The canvas object
     _canvas = new OTSolution.Annotations({
       feed: pubSub,
@@ -371,6 +392,7 @@
       };
 
     _canvas.onScreenCapture(onScreenCapture);
+    _requestPlatformData();
 
 
     var context = _elements.externalWindow ? _elements.externalWindow : window;
