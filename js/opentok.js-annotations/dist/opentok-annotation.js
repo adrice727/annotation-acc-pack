@@ -2465,6 +2465,7 @@
    * @param {object} options.canvasContainer - The id of the parent for the annotation canvas
    * @param {object | string} [options.externalWindow] - Reference to the annotation window (or query selector) if publishing
    * @param {array | string} [options.absoluteParent] - Reference to element (or query selector) for resize if other than container
+   * * @param {Boolean} [options.mobileInitiator] - Is cobrowsing being initiated by a mobile device
    */
   var linkCanvas = function (pubSub, container, options) {
     /**
