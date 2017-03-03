@@ -103,10 +103,16 @@
 
       var scale = {
         get X() {
+          if (cobrowsing && subscribingToMobileScreen) {
+            return update.canvasWidth / canvas.width;
+          }
           var width = cobrowsing ? canvas.width : self.videoFeed.stream.videoDimensions.width;
           return width / canvas.width;
         },
         get Y() {
+          if (cobrowsing && subscribingToMobileScreen) {
+            return update.canvasHeight / canvas.height;
+          }
           var height = cobrowsing ? canvas.height : self.videoFeed.stream.videoDimensions.height;
           return height / canvas.height;
         }
@@ -374,7 +380,7 @@
     };
 
     this.onMobileScreenShare = function (mobile) {
-      _subscribingToMobileScreen = mobile;
+      subscribingToMobileScreen = mobile;
     };
 
     this.onResize = function () {
